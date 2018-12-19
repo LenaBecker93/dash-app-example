@@ -10,7 +10,6 @@ import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
 
-
 app = dash.Dash(__name__)
 server = app.server
 
@@ -28,6 +27,7 @@ available_countries = df['GEO'].unique()
 colors = {
     'background' : '#6f0038',#'#4B0082',
     'white' : '#FFFFFF',
+    'black' : '#000000',
     'linesdots' : '#6f0038', #'#00BFFF' #
     'graphs' : '#ffd8ec'
 }
@@ -44,11 +44,14 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             style = {'font-size': '18px', 'text-align': 'center', 'color': colors['white']}
         ),
         html.Div([
+            html.H1(
+            children = 'Select  indicator for  x axis [Current prices, million euro]',
+            style = {'font-size': '14px', 'text-align': 'left', 'color': colors['white']}
+            ),
             dcc.Dropdown(
                 id='xaxis-column1',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                placeholder="Select  indicator for  x axis",
-                #value='Exports of goods and services',
+                value='Exports of goods and services',
                 ),
             dcc.RadioItems(
                 id='xaxis-type1',
@@ -59,10 +62,13 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         ],style={'width': '35%', 'display': 'inline-block', 'margin' : '10px 40px'},
         ),
         html.Div([
+            html.H1(
+            children = 'Select  indicator for  y axis [Current prices, million euro]',
+            style = {'font-size': '14px', 'text-align': 'left', 'color': colors['white']}
+            ),
             dcc.Dropdown(
                 id='yaxis-column1',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                #placeholder="Select  indicator for  y axis",
                 value='Gross domestic product at market prices'
             ),
             dcc.RadioItems(
@@ -77,7 +83,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     
     html.Div([
         dcc.Graph(
-            id='indicator-graphic1', 
+            id='indicator-graphic1',
+            clickData={'points': [{'text': 'Spain'}]},
             style={"height" : 300, 'color': colors['white'], 'backgroundColor': colors['graphs']}
         ),
     ], style = {'margin' : '10px 20px'}
@@ -107,20 +114,30 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         ),
         html.Div([
             #Dropdown for countries
-            dcc.Dropdown(
-                id='dropdown_countries2',
-                options=[{'label': i, 'value': i} for i in available_countries],
-                placeholder="Select a country"
-                #value='Belgium'
-            )         
+            html.H1(
+                children = 'Select another country by clicking on a dot in the first graph',
+                style = {'font-size': '14px', 'text-align': 'left', 'color': colors['white']}
+            ),
+            html.H1(
+                id='country',
+                style = {'font-size': '20px', 'text-align': 'left', 'color': colors['black'], 'backgroundColor': colors['white']}
+            )
+            #dcc.Dropdown(
+            #    id='dropdown_countries2',
+            #    options=[{'label': i, 'value': i} for i in available_countries],
+            #    value='Belgium'
+            #)         
         ],style={'width': '35%', 'display': 'inline-block', 'margin' : '10px 40px'}),
         
         html.Div([
             #Dropdown for indicators for y axis
+            html.H1(
+                children = 'Select  indicator for  y axis [Current prices, million euro]',
+                style = {'font-size': '14px', 'text-align': 'left', 'color': colors['white']}
+            ),
             dcc.Dropdown(
                 id='yaxis-column2',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                #placeholder="Select  indicator for  y axis"
                 value='Gross domestic product at market prices'
             )
         ],style={'width': '35%', 'float': 'right', 'display': 'inline-block', 'margin' : '10px 40px'})
@@ -133,7 +150,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     ], style = {'margin' : '10px 20px'} 
     ),
      html.H1(
-        children = 'Final Project Cloud Computing - Lena Becker - Master in Business Analytics ESADE Business School',
+        children = 'Final Project Cloud Computing - Lena Becker - Master in Business Analytics ESADE Business School ',
         style = {'font-size': '14px', 'text-align': 'right', 'color': colors['white']}
         )
 ])
@@ -171,7 +188,7 @@ def update_graph1(xaxis_column_name1, yaxis_column_name1,
                 'type': 'linear' if xaxis_type1 == 'Linear' else 'log'
             },
             yaxis={
-                'title': yaxis_column_name1,
+                'title': yaxis_column_name1 ,
                 'type': 'linear' if yaxis_type1 == 'Linear' else 'log'
             },
             margin={'l': 60, 'b': 40, 't': 40, 'r': 40},
@@ -184,13 +201,24 @@ def update_graph1(xaxis_column_name1, yaxis_column_name1,
         )
     }
 
+#Country selection with clickData
+@app.callback(
+    dash.dependencies.Output('country','children'),
+    [dash.dependencies.Input('indicator-graphic1','clickData')])
+
+def update_clickdata(clickData):
+    country_name = clickData['points'][0]['text']
+    return ' {}'.format(country_name)
+
+
 #Graph2
 @app.callback(
     dash.dependencies.Output('line-graphic2', 'figure'),
-    [dash.dependencies.Input('dropdown_countries2', 'value'),
-     dash.dependencies.Input('yaxis-column2', 'value')])
+    [dash.dependencies.Input('yaxis-column2', 'value'),
+     dash.dependencies.Input('indicator-graphic1','clickData')])
 
-def update_graph2(country2, yaxis_column_name2):
+def update_graph2(yaxis_column_name2, clickData):
+    country2 = clickData['points'][0]['text']
     dff=df[df['GEO']== country2]
     
     
