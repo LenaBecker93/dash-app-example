@@ -109,7 +109,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             style = {'font-size': '25px', 'text-align': 'center', 'color': colors['background']}
         ),
         html.H1(
-            children = 'Chronological development of an indicators per country from 2008 to 2017',
+            children = 'Chronological development of an indicator per country from 2008 to 2017',
             style = {'font-size': '18px', 'text-align': 'center', 'color': colors['white']}
         ),
         html.Div([
