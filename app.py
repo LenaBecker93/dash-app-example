@@ -25,73 +25,117 @@ df = df_filtered[df_filtered['UNIT'].str.contains('Current prices, million euro'
 available_indicators = df['NA_ITEM'].unique()
 available_countries = df['GEO'].unique()
 
-app.layout = html.Div([
+colors = {
+    'background' : '#6f0038',#'#4B0082',
+    'white' : '#FFFFFF',
+    'linesdots' : '#6f0038', #'#00BFFF' #
+    'graphs' : '#ffd8ec'
+}
+
+app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
     #part1
     html.Div([
-
+        html.H1(
+            children = 'eurostat Dashboard - GDP and main components',
+            style = {'font-size': '25px', 'text-align': 'center', 'color': colors['white']}
+        ),
+        html.H1(
+            children = 'Overview',
+            style = {'font-size': '18px', 'text-align': 'center', 'color': colors['white']}
+        ),
         html.Div([
             dcc.Dropdown(
                 id='xaxis-column1',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Exports of goods and services'
-            ),
+                placeholder="Select  indicator for  x axis",
+                #value='Exports of goods and services',
+                ),
             dcc.RadioItems(
                 id='xaxis-type1',
                 options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
                 value='Linear',
-                labelStyle={'display': 'inline-block'}
+                labelStyle={'display': 'inline-block', 'color': colors['white']}
             )
-        ],
-        style={'width': '48%', 'display': 'inline-block'}),
-
+        ],style={'width': '35%', 'display': 'inline-block', 'margin' : '10px 40px'},
+        ),
         html.Div([
             dcc.Dropdown(
                 id='yaxis-column1',
                 options=[{'label': i, 'value': i} for i in available_indicators],
+                #placeholder="Select  indicator for  y axis",
                 value='Gross domestic product at market prices'
             ),
             dcc.RadioItems(
                 id='yaxis-type1',
                 options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
                 value='Linear',
-                labelStyle={'display': 'inline-block'}
+                labelStyle={'display': 'inline-block', 'color': colors['white']}
             )
-        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
-    ]),
-
-    dcc.Graph(id='indicator-graphic1', style={"height" : 400}),
-
-    dcc.Slider(
-        id='year--slider1',
-        min=df['TIME'].min(),
-        max=df['TIME'].max(),
-        value=df['TIME'].max(),
-        step=None,
-        marks={str(year): str(year) for year in df['TIME'].unique()}
+        ],style={'width': '35%', 'float': 'right', 'display': 'inline-block', 'margin' : '10px 40px'})
+    ],
+    ),
+    
+    html.Div([
+        dcc.Graph(
+            id='indicator-graphic1', 
+            style={"height" : 300, 'color': colors['white'], 'backgroundColor': colors['graphs']}
+        ),
+    ], style = {'margin' : '10px 20px'}
+    ),
+    
+    html.Div([
+        dcc.Slider(
+            id='year--slider1',
+            min=df['TIME'].min(),
+            max=df['TIME'].max(),
+            value=df['TIME'].max(),
+            step=None,
+            marks={str(year): {'label' : str(year), 'style': {'color': colors['white']}} for year in df['TIME'].unique()},
+        ),
+        ], style = {'margin' : '10px 60px', 'color': colors['white']}
     ),
     
     #part2
     html.Div([
+        html.H1(
+            children = 'Space',
+            style = {'font-size': '25px', 'text-align': 'center', 'color': colors['background']}
+        ),
+        html.H1(
+            children = 'Chronological development of an indicators per country from 2008 to 2017',
+            style = {'font-size': '18px', 'text-align': 'center', 'color': colors['white']}
+        ),
         html.Div([
             #Dropdown for countries
             dcc.Dropdown(
                 id='dropdown_countries2',
                 options=[{'label': i, 'value': i} for i in available_countries],
-                value='Belgium'
+                placeholder="Select a country"
+                #value='Belgium'
             )         
-        ],style={'width': '48%', 'display': 'inline-block'}),
+        ],style={'width': '35%', 'display': 'inline-block', 'margin' : '10px 40px'}),
         
         html.Div([
             #Dropdown for indicators for y axis
             dcc.Dropdown(
                 id='yaxis-column2',
                 options=[{'label': i, 'value': i} for i in available_indicators],
+                #placeholder="Select  indicator for  y axis"
                 value='Gross domestic product at market prices'
             )
-        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
+        ],style={'width': '35%', 'float': 'right', 'display': 'inline-block', 'margin' : '10px 40px'})
     ]),
-
-    dcc.Graph(id='line-graphic2', style={"height" : 400}), 
+    html.Div([
+        dcc.Graph(
+            id='line-graphic2',
+            style={"height" : 300, 'backgroundColor': colors['graphs']}
+        ),
+    ], style = {'margin' : '10px 20px'} 
+    ),
+     html.H1(
+        children = 'Final Project Cloud Computing - Lena Becker - Master in Business Analytics ESADE Business School',
+        style = {'font-size': '14px', 'text-align': 'right', 'color': colors['white']}
+        )
 ])
 
 #Graph1
@@ -117,7 +161,8 @@ def update_graph1(xaxis_column_name1, yaxis_column_name1,
             marker={
                 'size': 15,
                 'opacity': 0.5,
-                'line': {'width': 0.5, 'color': 'white'}
+                'color': colors['linesdots'],
+                'line': {'width': 0.5, 'color': colors['linesdots']}
             }
         )],
         'layout': go.Layout(
@@ -129,8 +174,13 @@ def update_graph1(xaxis_column_name1, yaxis_column_name1,
                 'title': yaxis_column_name1,
                 'type': 'linear' if yaxis_type1 == 'Linear' else 'log'
             },
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest'
+            margin={'l': 60, 'b': 40, 't': 40, 'r': 40},
+            hovermode='closest',
+            plot_bgcolor= colors['graphs'],
+            paper_bgcolor= colors['background'],
+            font= {
+                'color': colors['white']
+            }
         )
     }
 
@@ -150,10 +200,13 @@ def update_graph2(country2, yaxis_column_name2):
             y=dff[dff['NA_ITEM'] == yaxis_column_name2]['Value'],
             text=dff['TIME'].unique(), 
             mode='lines',
+            line = dict(
+                color = (colors['linesdots']),
+                width = 4,),
             marker={
                 'size': 15,
                 'opacity': 1.0,
-                'line': {'width': 0.5, 'color': 'white'}
+                'line': {'width': 0.5, 'color': colors['linesdots']}
             }
         )],
         'layout': go.Layout(
@@ -162,15 +215,18 @@ def update_graph2(country2, yaxis_column_name2):
                 'type': 'date'
             },
             yaxis={
-                'title': yaxis_column_name2,
-                #'padding':30,
+                'title': yaxis_column_name2 + '\n',
                 'type': 'log'
             },
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest'
+            margin={'l': 60, 'b': 40, 't': 40, 'r':40},
+            hovermode='closest',
+            plot_bgcolor= colors['graphs'],
+            paper_bgcolor= colors['background'],
+            font= {
+                'color': colors['white']
+            }
         )
     }
 
 if __name__ == '__main__':
     app.run_server()
-
